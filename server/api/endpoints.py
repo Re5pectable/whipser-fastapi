@@ -43,4 +43,4 @@ async def get_transcript(id: str = Query('')):
     try:
         return get_transcription(id)
     except FileNotFoundError:
-        return RecognitionNotFoundError
+        raise RecognitionNotFoundError
