@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  application:
+    build: ./server
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./server:/src
+    environment:
+      - WHISPER_MODEL_TYPE=tiny

@@ -1,0 +1,3 @@
+server/transcription/models/*.pt
+server/transcription/results/*
+server/api/received/*
