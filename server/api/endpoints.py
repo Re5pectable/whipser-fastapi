@@ -34,7 +34,6 @@ async def transcribe(request: Request, file: UploadFile = File(...), language: s
         
     except Exception as e:
         _IS_READY = True
-        raise e
         raise UnknownError
 
     _IS_READY = True
