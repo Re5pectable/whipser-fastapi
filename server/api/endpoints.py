@@ -1,15 +1,16 @@
 from fastapi import APIRouter, File, Query, Request, UploadFile
 
-from ..transcription import transcribe_by_filepath, get_transcription
-from .utils import save_file
+from ..config import app_settings
+from ..transcription import get_transcription, transcribe_by_filepath
 from .errors import *
+from .utils import convert_to_mp3, save_file
 
 _IS_READY = True
 
 router = APIRouter()
 
 
-def check_readiness():
+def verify_readiness():
     global _IS_READY
     if not _IS_READY:
         raise BusyError
@@ -19,12 +20,21 @@ def check_readiness():
 @router.post('/recognize_new')
 async def transcribe(request: Request, file: UploadFile = File(...), language: str = Query("en")):
     global _IS_READY
-    check_readiness()
+    verify_readiness()
 
     try:
-        saved_file_path = await save_file(file)
-        data = await transcribe_by_filepath(saved_file_path)
+        path_to_target_file = await save_file(file)
+        
+        if not path_to_target_file.endswith('.mp3'):
+            convert_to_mp3(path_to_target_file, path_to_target_file + '.mp3')
+            path_to_target_file += '.mp3'
+        
+        transcription_path = app_settings.transcription_path + file.filename + '.json'    
+        data = transcribe_by_filepath(path_to_target_file, transcription_path)
+        
     except Exception as e:
+        _IS_READY = True
+        raise e
         raise UnknownError
 
     _IS_READY = True

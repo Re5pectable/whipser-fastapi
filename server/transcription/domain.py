@@ -1,4 +1,5 @@
 import json
+import os
 
 import whisper
 
@@ -9,27 +10,19 @@ __model = whisper.load_model(
     download_root=app_settings.whisper_models_dir
 )
 
-
-def get_filename(filepath: str):
-    no_dirs = filepath.split('/')[-1] if filepath.count('/') else filepath
-    no_ext = "".join(no_dirs.split('.')[:-1]) if no_dirs.count('.') > 1 else no_dirs
-    return no_ext + '.json'
+def get_transcription_filename(orig_filename: str):
+    return os.path.basename(orig_filename) + '.json'
 
 
 def get_path_to_save(filename: str):
-    return (
-        app_settings.transcription_path + '/'
-        if not str(app_settings.transcription_path).endswith('/')
-        else app_settings.transcription_path
-    ) + get_filename(filename)
+    return app_settings.transcription_path + os.path.basename(filename) + '.json'
 
 
 def get_transcription(orig_filename: str):
     return json.load(open(get_path_to_save(orig_filename), 'r'))
 
 
-async def transcribe_by_filepath(filepath: str) -> dict:
+def transcribe_by_filepath(filepath: str, path_to_save: str) -> dict:
     result = __model.transcribe(filepath, fp16=False)
-    path_to_save = get_path_to_save(filepath)
     json.dump(result, open(path_to_save, 'w'), ensure_ascii=False)
     return result

@@ -23,6 +23,7 @@ def get_model_type():
 def get_models_path():
     in_env = os.environ.get('WHISPER_MODELS_DIR')
     if in_env:
+        in_env = in_env if in_env.endswith('/') else in_env + '/'
         print('Running with user models path:', in_env)
         return in_env
     print('Running with default models path:', DEFAULT_MODELS_PATH)
@@ -32,6 +33,7 @@ def get_models_path():
 def get_audio_path():
     in_env = os.environ.get('AUDIO_PATH')
     if in_env:
+        in_env = in_env if in_env.endswith('/') else in_env + '/'
         print('Running with user audio path:', in_env)
         return in_env
     print('Running with default audio path:', DEFAULT_AUDIO_PATH)
@@ -40,6 +42,7 @@ def get_audio_path():
 def get_transcription_path():
     in_env = os.environ.get('TRANSCRIPTION_PATH')
     if in_env:
+        in_env = in_env if in_env.endswith('/') else in_env + '/'
         print('Running with user transcription path:', in_env)
         return in_env
     print('Running with default transcription path:', DEFAULT_TRANSCRIPTION_PATH)
