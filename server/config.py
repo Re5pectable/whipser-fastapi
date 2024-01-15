@@ -10,6 +10,13 @@ DEFAULT_MODELS_PATH = './src/transcription/models/'
 DEFAULT_AUDIO_PATH = './src/api/received/'
 DEFAULT_TRANSCRIPTION_PATH = './src/transcription/results/'
 
+def _create_directory_if_not_exists(directory_path):
+    if not os.path.exists(directory_path):
+        os.makedirs(directory_path)
+        print(f"Folder {directory_path} was created")
+    else:
+        print(f"Folder {directory_path} already exists, skipping...")
+
 
 def get_model_type():
     in_env = os.environ.get('WHISPER_MODEL_TYPE')
@@ -57,3 +64,7 @@ class AppSettings(BaseModel):
 
 
 app_settings = AppSettings()
+
+_create_directory_if_not_exists(app_settings.audio_path)
+_create_directory_if_not_exists(app_settings.transcription_path)
+_create_directory_if_not_exists(app_settings.whisper_models_dir)
