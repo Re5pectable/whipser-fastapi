@@ -30,7 +30,7 @@ async def transcribe(request: Request, file: UploadFile = File(...), language: s
             path_to_target_file += '.mp3'
         
         transcription_path = app_settings.transcription_path + file.filename + '.json'    
-        data = transcribe_by_filepath(path_to_target_file, transcription_path)
+        data = transcribe_by_filepath(language, path_to_target_file, transcription_path)
         
     except Exception as e:
         _IS_READY = True
