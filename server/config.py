@@ -1,70 +1,37 @@
 import os
-from typing import Literal, Optional
+from typing import Optional
+from pydantic import BaseModel
 
-from pydantic import BaseModel, FileUrl
-
-available_models = Literal['tiny', 'base', 'small', 'medium', 'large']
-
+# Константы по умолчанию
 DEFAULT_MODEL = 'base'
 DEFAULT_MODELS_PATH = './src/transcription/models/'
 DEFAULT_AUDIO_PATH = './src/api/received/'
 DEFAULT_TRANSCRIPTION_PATH = './src/transcription/results/'
 
-def _create_directory_if_not_exists(directory_path):
-    if not os.path.exists(directory_path):
-        os.makedirs(directory_path)
-        print(f"Folder {directory_path} was created")
-    else:
-        print(f"Folder {directory_path} already exists, skipping...")
+def create_directory_if_not_exists(directory_path: str):
+    try:
+        os.makedirs(directory_path, exist_ok=True)
+        print(f"Folder '{directory_path}' was created")
+    except FileExistsError:
+        print(f"Folder '{directory_path}' already exists, skipping...")
 
-
-def get_model_type():
-    in_env = os.environ.get('WHISPER_MODEL_TYPE')
-    if in_env:
-        print('Running with user model:', in_env)
-        return in_env
-    print('Running with default model:', DEFAULT_MODEL)
-    return DEFAULT_MODEL
-
-
-def get_models_path():
-    in_env = os.environ.get('WHISPER_MODELS_DIR')
-    if in_env:
-        in_env = in_env if in_env.endswith('/') else in_env + '/'
-        print('Running with user models path:', in_env)
-        return in_env
-    print('Running with default models path:', DEFAULT_MODELS_PATH)
-    return DEFAULT_MODELS_PATH
-
-
-def get_audio_path():
-    in_env = os.environ.get('AUDIO_PATH')
-    if in_env:
-        in_env = in_env if in_env.endswith('/') else in_env + '/'
-        print('Running with user audio path:', in_env)
-        return in_env
-    print('Running with default audio path:', DEFAULT_AUDIO_PATH)
-    return DEFAULT_AUDIO_PATH
-
-def get_transcription_path():
-    in_env = os.environ.get('TRANSCRIPTION_PATH')
-    if in_env:
-        in_env = in_env if in_env.endswith('/') else in_env + '/'
-        print('Running with user transcription path:', in_env)
-        return in_env
-    print('Running with default transcription path:', DEFAULT_TRANSCRIPTION_PATH)
-    return DEFAULT_TRANSCRIPTION_PATH
-
+def get_env_path(env_var: str, default_path: str) -> str:
+    path = os.getenv(env_var, default_path)
+    return path if path.endswith('/') else path + '/'
 
 class AppSettings(BaseModel):
-    whisper_model_type: Optional[available_models] = get_model_type()
-    whisper_models_dir: Optional[FileUrl] = get_models_path()
-    audio_path: Optional[FileUrl] = get_audio_path()
-    transcription_path: Optional[FileUrl] = get_transcription_path()
-
+    whisper_model_type: str = os.getenv('WHISPER_MODEL_TYPE', DEFAULT_MODEL)
+    whisper_models_dir: str = get_env_path('WHISPER_MODELS_DIR', DEFAULT_MODELS_PATH)
+    audio_path: str = get_env_path('AUDIO_PATH', DEFAULT_AUDIO_PATH)
+    transcription_path: str = get_env_path('TRANSCRIPTION_PATH', DEFAULT_TRANSCRIPTION_PATH)
 
 app_settings = AppSettings()
 
-_create_directory_if_not_exists(app_settings.audio_path)
-_create_directory_if_not_exists(app_settings.transcription_path)
-_create_directory_if_not_exists(app_settings.whisper_models_dir)
+create_directory_if_not_exists(app_settings.audio_path)
+create_directory_if_not_exists(app_settings.transcription_path)
+create_directory_if_not_exists(app_settings.whisper_models_dir)
+
+print(f'Running with model type: {app_settings.whisper_model_type}')
+print(f'Running with models path: {app_settings.whisper_models_dir}')
+print(f'Running with audio path: {app_settings.audio_path}')
+print(f'Running with transcription path: {app_settings.transcription_path}')
